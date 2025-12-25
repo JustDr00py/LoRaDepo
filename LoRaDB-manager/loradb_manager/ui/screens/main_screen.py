@@ -16,13 +16,13 @@ class MainScreen(Screen):
     """Main screen showing list of instances."""
 
     BINDINGS = [
-        Binding("enter", "select_instance", "View Details"),
-        Binding("s", "start_instance", "Start"),
-        Binding("t", "stop_instance", "Stop"),
-        Binding("b", "rebuild_instance", "Rebuild"),
-        Binding("l", "view_logs", "Logs"),
-        Binding("e", "edit_config", "Edit Config"),
-        Binding("d", "delete_instance", "Delete"),
+        Binding("s", "start_instance", "Start", show=True),
+        Binding("t", "stop_instance", "Stop", show=True),
+        Binding("l", "view_logs", "Logs", show=True),
+        Binding("e", "edit_config", "Edit", show=True),
+        Binding("d", "delete_instance", "Delete", show=True),
+        Binding("b", "rebuild_instance", "Rebuild", show=False),
+        Binding("enter", "select_instance", "Details", show=False),
     ]
 
     selected_instance_id = reactive(None)
@@ -39,9 +39,8 @@ class MainScreen(Screen):
 
     def compose(self) -> ComposeResult:
         """Compose main screen layout."""
-        yield Static("LoRaDB Instance Manager", classes="title")
         yield Static(
-            f"Instances: {len(self.instance_manager.list_instances())}",
+            f"LoRaDB Instance Manager - Instances: {len(self.instance_manager.list_instances())}",
             id="instance-count"
         )
 
@@ -50,6 +49,7 @@ class MainScreen(Screen):
 
         # Action buttons
         yield Horizontal(
+            Button("Create Instance", id="btn-create", variant="success"),
             Button("Start", id="btn-start", variant="success"),
             Button("Stop", id="btn-stop", variant="warning"),
             Button("Restart", id="btn-restart"),
@@ -146,6 +146,11 @@ class MainScreen(Screen):
 
     def on_button_pressed(self, event):
         """Handle button presses."""
+        # Handle Create button (doesn't need instance selection)
+        if event.button.id == "btn-create":
+            self.action_create_instance()
+            return
+
         # Auto-select if only one instance exists
         if not self.selected_instance_id:
             instances = self.instance_manager.list_instances()
@@ -302,3 +307,8 @@ class MainScreen(Screen):
                     f"Instance: {instance.name} - Status: {instance.status.value}",
                     severity="information"
                 )
+
+    def action_create_instance(self):
+        """Open create instance wizard."""
+        from .create_wizard import CreateInstanceWizard
+        self.app.push_screen(CreateInstanceWizard(self.instance_manager))

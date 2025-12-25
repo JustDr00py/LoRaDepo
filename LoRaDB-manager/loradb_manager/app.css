@@ -2,7 +2,7 @@
 
 /* Main container */
 MainScreen {
-    padding: 1;
+    padding: 0;
     height: 100%;
     layout: vertical;
 }
@@ -13,12 +13,16 @@ MainScreen {
     text-style: bold;
     background: $primary;
     color: $text;
-    padding: 1;
+    padding: 0 1;
     margin-bottom: 1;
 }
 
 #instance-count {
     text-align: center;
+    text-style: bold;
+    background: $primary;
+    color: $text;
+    padding: 0 1;
     margin-bottom: 1;
 }
 
@@ -42,7 +46,7 @@ MainScreen {
 .action-buttons {
     height: auto;
     align: center middle;
-    padding: 1;
+    padding: 0 1;
 }
 
 .action-buttons Button {
@@ -51,7 +55,7 @@ MainScreen {
 
 /* Wizard styles */
 #wizard-container {
-    padding: 2;
+    padding: 0;
     height: 100%;
 }
 
@@ -59,8 +63,8 @@ MainScreen {
     text-align: center;
     text-style: bold;
     background: $primary;
-    padding: 1;
-    margin-bottom: 2;
+    padding: 0 1;
+    margin-bottom: 1;
 }
 
 .wizard-step {
@@ -107,7 +111,7 @@ MainScreen {
 
 /* Logs viewer */
 #logs-container {
-    padding: 1;
+    padding: 0;
     height: 100%;
 }
 
@@ -115,7 +119,7 @@ MainScreen {
     text-align: center;
     text-style: bold;
     background: $primary;
-    padding: 1;
+    padding: 0 1;
     margin-bottom: 1;
 }
 
@@ -147,7 +151,7 @@ MainScreen {
 
 /* Config editor */
 #editor-container {
-    padding: 1;
+    padding: 0;
     height: 100%;
 }
 

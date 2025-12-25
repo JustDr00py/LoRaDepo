@@ -14,10 +14,13 @@ class LoRaDBManagerApp(App):
 
     CSS_PATH = "app.css"
 
+    # Enable footer
+    ENABLE_COMMAND_PALETTE = False
+
     BINDINGS = [
-        Binding("q", "quit", "Quit", priority=True),
-        Binding("c", "create_instance", "Create Instance"),
-        Binding("r", "refresh", "Refresh"),
+        Binding("q", "quit", "Quit", priority=True, show=True),
+        Binding("c", "create_instance", "Create", show=True),
+        Binding("r", "refresh", "Refresh", show=True),
     ]
 
     def __init__(self):
@@ -29,8 +32,8 @@ class LoRaDBManagerApp(App):
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
-        yield Header(show_clock=True)
-        yield Footer()
+        # Footer is in each Screen instead
+        return []
 
     def on_mount(self) -> None:
         """Set up the app when mounted."""
