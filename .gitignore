@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Instance data (created by LoRaDB-manager)
+.loradb-instances/
+
+# LoRaDB-manager specific
+LoRaDB-manager/venv/
+LoRaDB-manager/*.egg-info/
+LoRaDB-manager/.pytest_cache/
+LoRaDB-manager/__pycache__/
+
+# LoRaDB compiled artifacts
+LoRaDB/target/
+LoRaDB/Cargo.lock
+
+# LoRaDB-UI
+LoRaDB-UI/frontend/node_modules/
+LoRaDB-UI/frontend/dist/
+LoRaDB-UI/frontend/.vite/
+LoRaDB-UI/backend/node_modules/
+LoRaDB-UI/backend/dist/
+
+# Environment files (may contain secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Docker
+.docker/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
