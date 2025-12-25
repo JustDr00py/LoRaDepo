@@ -7,10 +7,14 @@ import os
 class Config:
     """Global application configuration."""
 
-    # Paths
+    # Paths - dynamically determine based on this file's location
+    # This file is at: LoRaDepo/LoRaDB-manager/loradb_manager/config.py
+    # So parent.parent.parent gets us to LoRaDepo/
+    _BASE_DIR = Path(__file__).parent.parent.parent
+
     INSTANCES_ROOT = Path.home() / ".loradb-instances"
-    LORADB_TEMPLATE = Path("/home/sysadmin/Documents/LoRaDepo/LoRaDB")
-    UI_TEMPLATE = Path("/home/sysadmin/Documents/LoRaDepo/LoRaDB-UI")
+    LORADB_TEMPLATE = _BASE_DIR / "LoRaDB"
+    UI_TEMPLATE = _BASE_DIR / "LoRaDB-UI"
 
     # Port allocation
     PORT_RANGE_MIN = 8000
