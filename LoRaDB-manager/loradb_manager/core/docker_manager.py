@@ -293,7 +293,7 @@ class DockerManager:
             RuntimeError: If command fails
         """
         result = subprocess.run(
-            ["docker", "compose", "-p", project_name, "-f", str(compose_file), "build"],
+            ["docker", "compose", "-p", project_name, "-f", str(compose_file), "build", "--no-cache"],
             cwd=compose_file.parent,
             capture_output=True,
             text=True,

@@ -248,6 +248,10 @@ CORS_ORIGIN=http://localhost:{frontend_port}
         with open(compose_path, 'r') as f:
             compose = yaml.safe_load(f)
 
+        # Remove obsolete 'version' field (Docker Compose V2 doesn't need it)
+        if 'version' in compose:
+            del compose['version']
+
         if service_type == "loradb":
             self._modify_loradb_compose(compose, instance_id, network_name, volume_name)
         elif service_type == "ui":
