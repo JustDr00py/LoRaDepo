@@ -45,13 +45,6 @@ LoRaDB-manager/__pycache__/
 LoRaDB/target/
 LoRaDB/Cargo.lock
 
-# LoRaDB-UI
-LoRaDB-UI/frontend/node_modules/
-LoRaDB-UI/frontend/dist/
-LoRaDB-UI/frontend/.vite/
-LoRaDB-UI/backend/node_modules/
-LoRaDB-UI/backend/dist/
-
 # Environment files (may contain secrets)
 .env
 .env.local
