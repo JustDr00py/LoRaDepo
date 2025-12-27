@@ -128,12 +128,10 @@ class InstanceManager:
             raise ValueError(f"Directory for instance '{instance_id}' already exists")
 
         loradb_dir = instance_dir / "loradb"
-        ui_dir = instance_dir / "loradb-ui"
 
         try:
             # Copy templates
             self.template_manager.copy_loradb_template(loradb_dir)
-            self.template_manager.copy_ui_template(ui_dir)
 
             # Generate network and volume names
             network = NetworkConfig(
@@ -150,29 +148,12 @@ class InstanceManager:
                 tls_key_path=tls_key_path
             )
 
-            self.template_manager.generate_ui_env(
-                ui_dir / ".env",
-                backend_port=ports.ui_backend,
-                frontend_port=ports.ui_frontend,
-                jwt_secret=jwt_secret,
-                loradb_url=f"http://loradb-{instance_id}:8443"
-            )
-
-            # Modify docker-compose.yml files with unique names
+            # Modify docker-compose.yml with unique names
             self.template_manager.modify_docker_compose(
                 loradb_dir / "docker-compose.yml",
                 instance_id,
-                "loradb",
                 network.network_name,
                 network.loradb_volume
-            )
-
-            self.template_manager.modify_docker_compose(
-                ui_dir / "docker-compose.yml",
-                instance_id,
-                "ui",
-                network.network_name,
-                None
             )
 
             # Create metadata
@@ -182,7 +163,6 @@ class InstanceManager:
                 description=description,
                 instance_dir=str(instance_dir),
                 loradb_dir=str(loradb_dir),
-                ui_dir=str(ui_dir),
                 ports=ports,
                 network=network,
                 jwt_secret=jwt_secret,
@@ -374,7 +354,7 @@ class InstanceManager:
         """
         Rebuild an instance (stops, rebuilds Docker images, starts).
 
-        This is useful when the LoRaDB or UI code has been updated and you
+        This is useful when the LoRaDB code has been updated and you
         need to rebuild the Docker images to pick up the changes.
 
         Args:

@@ -14,7 +14,6 @@ class Config:
 
     INSTANCES_ROOT = Path.home() / ".loradb-instances"
     LORADB_TEMPLATE = _BASE_DIR / "LoRaDB"
-    UI_TEMPLATE = _BASE_DIR / "LoRaDB-UI"
 
     # Port allocation
     PORT_RANGE_MIN = 8000
@@ -22,8 +21,6 @@ class Config:
 
     # Default ports
     DEFAULT_LORADB_PORT = 8443
-    DEFAULT_UI_BACKEND_PORT = 3001
-    DEFAULT_UI_FRONTEND_PORT = 3000
 
     # Docker
     DOCKER_COMPOSE_TIMEOUT = 120  # seconds
@@ -46,12 +43,6 @@ class Config:
             raise RuntimeError(
                 f"LoRaDB template not found at {cls.LORADB_TEMPLATE}. "
                 "Please ensure LoRaDB directory exists."
-            )
-
-        if not cls.UI_TEMPLATE.exists():
-            raise RuntimeError(
-                f"LoRaDB-UI template not found at {cls.UI_TEMPLATE}. "
-                "Please ensure LoRaDB-UI directory exists."
             )
 
         # Test Docker connection

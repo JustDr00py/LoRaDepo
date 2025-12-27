@@ -45,7 +45,6 @@ That's it! The script handles everything automatically (venv creation, dependenc
 LoRaDB Instance Manager enables you to run multiple isolated LoRaDB instances on a single machine, each with:
 
 - **Complete LoRaDB backend** - Rust-based time-series database
-- **LoRaDB-UI** - Node.js backend + React frontend
 - **Isolated Docker resources** - Unique networks, volumes, containers
 - **Independent configurations** - Separate .env files and settings
 - **Automatic port allocation** - No manual port management needed
@@ -99,7 +98,6 @@ Perfect for:
 
 3. **LoRaDB Templates** at:
    - `/home/sysadmin/Documents/LoRaDepo/LoRaDB`
-   - `/home/sysadmin/Documents/LoRaDepo/LoRaDB-UI`
 
 ### System Requirements
 
@@ -282,8 +280,8 @@ loradb-manager     # If installed and venv activated
 5. Click **Create**
 
 The application will:
-- Copy templates from LoRaDB and LoRaDB-UI directories
-- Generate .env files with matching JWT secrets
+- Copy templates from LoRaDB directory
+- Generate .env files with JWT secrets
 - Create unique Docker resources (networks, volumes)
 - Allocate available ports automatically
 
@@ -380,9 +378,6 @@ Instances are stored at `~/.loradb-instances/`:
 │   │   ├── Cargo.toml
 │   │   ├── src/
 │   │   └── ...
-│   └── loradb-ui/
-│       ├── docker-compose.yml # Modified with unique names
-│       ├── .env               # Generated configuration
 │       ├── backend/
 │       ├── frontend/
 │       └── ...
@@ -396,8 +391,6 @@ Each instance creates isolated Docker resources:
 
 **Containers**:
 - `loradb-{instance-id}` - LoRaDB database
-- `loradb-ui-backend-{instance-id}` - Node.js API server
-- `loradb-ui-frontend-{instance-id}` - React dev server
 
 **Network**:
 - `loradb-net-{instance-id}` - Bridge network for inter-container communication
@@ -511,7 +504,6 @@ Edit `loradb_manager/config.py` to customize:
 class Config:
     INSTANCES_ROOT = Path.home() / ".loradb-instances"
     LORADB_TEMPLATE = Path("/path/to/LoRaDB")
-    UI_TEMPLATE = Path("/path/to/LoRaDB-UI")
 
     # Timeouts
     DOCKER_COMPOSE_TIMEOUT = 300
@@ -563,7 +555,7 @@ sudo usermod -aG docker $USER
 **Error**: `LoRaDB template not found at /path/to/LoRaDB`
 
 **Solution**:
-- Ensure LoRaDB and LoRaDB-UI directories exist
+- Ensure LoRaDB directory exists
 - Update paths in `loradb_manager/config.py`
 
 #### Container Won't Start
@@ -798,7 +790,7 @@ This project is part of the LoRaDepo ecosystem.
 
 - Built with [Textual](https://github.com/Textualize/textual) - amazing TUI framework
 - Docker Python SDK for container management
-- LoRaDB and LoRaDB-UI projects
+- LoRaDB project
 
 ---
 

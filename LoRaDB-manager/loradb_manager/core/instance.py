@@ -19,8 +19,6 @@ class InstanceStatus(str, Enum):
 class PortAllocation(BaseModel):
     """Port allocation for an instance."""
     loradb_api: int = Field(..., ge=1024, le=65535, description="LoRaDB API port")
-    ui_backend: int = Field(..., ge=1024, le=65535, description="UI backend port")
-    ui_frontend: int = Field(..., ge=1024, le=65535, description="UI frontend port")
 
 
 class NetworkConfig(BaseModel):
@@ -40,7 +38,6 @@ class InstanceMetadata(BaseModel):
     # Path information
     instance_dir: str = Field(..., description="Root directory for instance")
     loradb_dir: str = Field(..., description="LoRaDB directory")
-    ui_dir: str = Field(..., description="LoRaDB-UI directory")
 
     # Port allocations
     ports: PortAllocation
@@ -60,8 +57,6 @@ class InstanceMetadata(BaseModel):
 
     # Container IDs (populated at runtime)
     loradb_container_id: Optional[str] = None
-    ui_backend_container_id: Optional[str] = None
-    ui_frontend_container_id: Optional[str] = None
 
     model_config = {
         "json_encoders": {

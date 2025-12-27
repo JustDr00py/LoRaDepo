@@ -57,12 +57,6 @@ class CreateInstanceWizard(Screen):
                     Label("LoRaDB API Port (default: 8443):"),
                     Input(placeholder="8443", id="input-port-loradb"),
 
-                    Label("UI Backend Port (default: 3001):"),
-                    Input(placeholder="3001", id="input-port-backend"),
-
-                    Label("UI Frontend Port (default: 3000):"),
-                    Input(placeholder="3000", id="input-port-frontend"),
-
                     id="step-2",
                     classes="wizard-step hidden"
                 ),
@@ -187,8 +181,6 @@ class CreateInstanceWizard(Screen):
 
         elif self.step == 2:
             self.form_data['port_loradb'] = self._parse_port("#input-port-loradb")
-            self.form_data['port_backend'] = self._parse_port("#input-port-backend")
-            self.form_data['port_frontend'] = self._parse_port("#input-port-frontend")
 
         elif self.step == 3:
             self.form_data['jwt_secret'] = self.query_one("#input-jwt-secret", Input).value or None
@@ -218,13 +210,9 @@ class CreateInstanceWizard(Screen):
         import asyncio
         try:
             preferred_ports = None
-            if any([self.form_data.get('port_loradb'),
-                   self.form_data.get('port_backend'),
-                   self.form_data.get('port_frontend')]):
+            if self.form_data.get('port_loradb'):
                 preferred_ports = {
                     'loradb_api': self.form_data.get('port_loradb'),
-                    'ui_backend': self.form_data.get('port_backend'),
-                    'ui_frontend': self.form_data.get('port_frontend'),
                 }
 
             # Run blocking operation in thread pool

@@ -43,7 +43,6 @@ class ConfigEditorScreen(Screen):
                     Select(
                         options=[
                             ("LoRaDB .env", str(Path(self.instance.loradb_dir) / ".env")),
-                            ("UI .env", str(Path(self.instance.ui_dir) / ".env")),
                         ],
                         value=str(Path(self.instance.loradb_dir) / ".env"),
                         id="file-select"

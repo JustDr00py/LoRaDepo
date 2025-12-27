@@ -30,8 +30,6 @@ class DockerManager:
         """
         Start instance using docker-compose up -d.
 
-        Starts LoRaDB first, waits for health check, then starts UI.
-
         Args:
             metadata: Instance metadata
 
@@ -39,9 +37,8 @@ class DockerManager:
             RuntimeError: If docker-compose command fails
         """
         loradb_compose = Path(metadata.loradb_dir) / "docker-compose.yml"
-        ui_compose = Path(metadata.ui_dir) / "docker-compose.yml"
 
-        # Start LoRaDB first with unique project name
+        # Start LoRaDB with unique project name
         self._compose_up(loradb_compose, f"loradb-{metadata.instance_id}")
 
         # Wait for LoRaDB to be healthy
@@ -57,9 +54,6 @@ class DockerManager:
                 timeout=30
             )
 
-        # Start UI services with unique project name
-        self._compose_up(ui_compose, f"loradb-ui-{metadata.instance_id}")
-
         # Update container IDs
         self._update_container_ids(metadata)
 
@@ -67,21 +61,15 @@ class DockerManager:
         """
         Stop instance using docker-compose down.
 
-        Stops UI first, then LoRaDB.
-
         Args:
             metadata: Instance metadata
 
         Raises:
             RuntimeError: If docker-compose command fails
         """
-        ui_compose = Path(metadata.ui_dir) / "docker-compose.yml"
         loradb_compose = Path(metadata.loradb_dir) / "docker-compose.yml"
 
-        # Stop UI first with unique project name
-        self._compose_down(ui_compose, f"loradb-ui-{metadata.instance_id}")
-
-        # Then stop LoRaDB with unique project name
+        # Stop LoRaDB with unique project name
         self._compose_down(loradb_compose, f"loradb-{metadata.instance_id}")
 
     def restart_instance(self, metadata: InstanceMetadata):
@@ -100,7 +88,7 @@ class DockerManager:
         Rebuild instance (stops, rebuilds Docker images, starts).
 
         This rebuilds the Docker images from the templates, which is useful when
-        the LoRaDB or UI code has been updated.
+        the LoRaDB code has been updated.
 
         Args:
             metadata: Instance metadata
@@ -109,7 +97,6 @@ class DockerManager:
             RuntimeError: If docker-compose command fails
         """
         loradb_compose = Path(metadata.loradb_dir) / "docker-compose.yml"
-        ui_compose = Path(metadata.ui_dir) / "docker-compose.yml"
 
         # Stop containers first
         self.stop_instance(metadata)
@@ -118,15 +105,12 @@ class DockerManager:
         # Rebuild LoRaDB image
         self._compose_build(loradb_compose, f"loradb-{metadata.instance_id}")
 
-        # Rebuild UI images
-        self._compose_build(ui_compose, f"loradb-ui-{metadata.instance_id}")
-
         # Start with new images
         self.start_instance(metadata)
 
     def get_instance_status(self, metadata: InstanceMetadata) -> InstanceStatus:
         """
-        Get aggregated status of all containers for an instance.
+        Get status of LoRaDB container for an instance.
 
         Args:
             metadata: Instance metadata
@@ -135,37 +119,23 @@ class DockerManager:
             InstanceStatus enum value
         """
         try:
-            container_names = [
-                f"loradb-{metadata.instance_id}",
-                f"loradb-ui-backend-{metadata.instance_id}",
-                f"loradb-ui-frontend-{metadata.instance_id}"
-            ]
+            container_name = f"loradb-{metadata.instance_id}"
 
-            statuses = []
-            for name in container_names:
-                try:
-                    container = self.client.containers.get(name)
-                    statuses.append(container.status)
-                except NotFound:
-                    statuses.append("not_found")
-
-            # If all containers not found, instance is stopped
-            if all(s == "not_found" for s in statuses):
+            try:
+                container = self.client.containers.get(container_name)
+                status = container.status
+            except NotFound:
                 return InstanceStatus.STOPPED
 
-            # If all running, instance is running
-            if all(s == "running" for s in statuses if s != "not_found"):
+            # Map Docker status to InstanceStatus
+            if status == "running":
                 return InstanceStatus.RUNNING
-
-            # If any running, instance is starting/partially started
-            if any(s == "running" for s in statuses):
-                return InstanceStatus.STARTING
-
-            # If any exited or dead
-            if any(s in ["exited", "dead"] for s in statuses):
+            elif status in ["exited", "dead"]:
                 return InstanceStatus.ERROR
-
-            return InstanceStatus.UNKNOWN
+            elif status == "created":
+                return InstanceStatus.STARTING
+            else:
+                return InstanceStatus.UNKNOWN
 
         except Exception:
             return InstanceStatus.ERROR
@@ -195,23 +165,18 @@ class DockerManager:
 
     def remove_containers(self, metadata: InstanceMetadata):
         """
-        Remove containers for an instance (if they exist).
+        Remove container for an instance (if it exists).
 
         Args:
             metadata: Instance metadata
         """
-        container_names = [
-            f"loradb-{metadata.instance_id}",
-            f"loradb-ui-backend-{metadata.instance_id}",
-            f"loradb-ui-frontend-{metadata.instance_id}"
-        ]
+        container_name = f"loradb-{metadata.instance_id}"
 
-        for name in container_names:
-            try:
-                container = self.client.containers.get(name)
-                container.remove(force=True)
-            except NotFound:
-                pass
+        try:
+            container = self.client.containers.get(container_name)
+            container.remove(force=True)
+        except NotFound:
+            pass
 
     def remove_network(self, network_name: str):
         """
@@ -367,11 +332,6 @@ class DockerManager:
         """
         try:
             loradb = self.client.containers.get(f"loradb-{metadata.instance_id}")
-            backend = self.client.containers.get(f"loradb-ui-backend-{metadata.instance_id}")
-            frontend = self.client.containers.get(f"loradb-ui-frontend-{metadata.instance_id}")
-
             metadata.loradb_container_id = loradb.id
-            metadata.ui_backend_container_id = backend.id
-            metadata.ui_frontend_container_id = frontend.id
         except NotFound:
             pass

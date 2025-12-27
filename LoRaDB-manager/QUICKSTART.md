@@ -92,7 +92,7 @@ Make sure Docker is running before starting the application!
 
 ### "Templates not found"
 - Make sure you're in the correct directory
-- Check that LoRaDB and LoRaDB-UI directories exist
+- Check that LoRaDB directory exists
 
 ## Daily Usage
 

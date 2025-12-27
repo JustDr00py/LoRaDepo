@@ -69,11 +69,8 @@ class LogsViewerScreen(Screen):
         """Compose logs viewer UI."""
         yield Static(f"Logs: {self.instance.name}", classes="screen-title")
 
-        # Container selector and control buttons - combined into one row
+        # Control buttons
         yield Horizontal(
-            Button("LoRaDB", id="btn-container-loradb", variant="primary"),
-            Button("UI Backend", id="btn-container-backend"),
-            Button("UI Frontend", id="btn-container-frontend"),
             Button("Refresh", id="btn-refresh"),
             Button("Clear", id="btn-clear"),
             Button("Close", id="btn-close", variant="error"),
@@ -138,18 +135,8 @@ class LogsViewerScreen(Screen):
         import logging
         logging.info(f"Button pressed: {event.button.id}")
 
-        # Container selection buttons
-        if event.button.id == "btn-container-loradb":
-            logging.info("Switching to LoRaDB container")
-            self._switch_container(f"loradb-{self.instance.instance_id}", event.button)
-        elif event.button.id == "btn-container-backend":
-            logging.info("Switching to UI Backend container")
-            self._switch_container(f"loradb-ui-backend-{self.instance.instance_id}", event.button)
-        elif event.button.id == "btn-container-frontend":
-            logging.info("Switching to UI Frontend container")
-            self._switch_container(f"loradb-ui-frontend-{self.instance.instance_id}", event.button)
         # Control buttons
-        elif event.button.id == "btn-refresh":
+        if event.button.id == "btn-refresh":
             logging.info("Refresh button pressed")
             self._start_log_stream()
         elif event.button.id == "btn-clear":
@@ -158,24 +145,6 @@ class LogsViewerScreen(Screen):
         elif event.button.id == "btn-close":
             logging.info("Close button pressed")
             self.action_close()
-
-    def _switch_container(self, container_name: str, button: Button):
-        """Switch to viewing a different container."""
-        import logging
-        logging.info(f"=== _switch_container called ===")
-        logging.info(f"Switching from {self.current_container} to {container_name}")
-
-        self.current_container = container_name
-
-        # Update button variants to show which is active
-        for btn in self.query("Button"):
-            if btn.id and btn.id.startswith("btn-container-"):
-                btn.variant = "primary" if btn == button else "default"
-                logging.info(f"Button {btn.id}: variant={btn.variant}")
-
-        logging.info("Starting log stream for new container")
-        self._start_log_stream()
-        self._update_status()
 
     def action_close(self):
         """Close logs viewer."""

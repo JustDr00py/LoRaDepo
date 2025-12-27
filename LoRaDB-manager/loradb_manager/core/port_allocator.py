@@ -12,8 +12,6 @@ class PortAllocator:
 
     DEFAULT_PORTS = {
         "loradb_api": 8443,
-        "ui_backend": 3001,
-        "ui_frontend": 3000,
     }
 
     MIN_PORT = 8000
@@ -118,8 +116,7 @@ class PortAllocator:
         Args:
             ports: PortAllocation to release
         """
-        for port in [ports.loradb_api, ports.ui_backend, ports.ui_frontend]:
-            self.allocated_ports.discard(port)
+        self.allocated_ports.discard(ports.loradb_api)
         self._save_registry()
 
     def get_allocated_ports(self) -> Set[int]:

@@ -13,7 +13,6 @@ class TemplateManager:
     def __init__(self):
         """Initialize template manager with configured template paths."""
         self.loradb_template = Config.LORADB_TEMPLATE
-        self.ui_template = Config.UI_TEMPLATE
 
     def copy_loradb_template(self, dest: Path):
         """
@@ -31,25 +30,6 @@ class TemplateManager:
             ignore=shutil.ignore_patterns(
                 '.git', '.env', 'target', 'node_modules', '__pycache__',
                 '*.pyc', '.gitignore', '.dockerignore'
-            )
-        )
-
-    def copy_ui_template(self, dest: Path):
-        """
-        Copy LoRaDB-UI template to destination directory.
-
-        Args:
-            dest: Destination directory path
-
-        Raises:
-            IOError: If template copy fails
-        """
-        shutil.copytree(
-            self.ui_template,
-            dest,
-            ignore=shutil.ignore_patterns(
-                '.git', '.env', 'node_modules', 'dist', 'build',
-                '__pycache__', '*.pyc', '.gitignore', '.dockerignore'
             )
         )
 
@@ -185,53 +165,10 @@ LORADB_MQTT_CHIRPSTACK_BROKER=mqtt://localhost:1883
 
         return config
 
-    def generate_ui_env(
-        self,
-        env_path: Path,
-        backend_port: int,
-        frontend_port: int,
-        jwt_secret: str,
-        loradb_url: str
-    ):
-        """
-        Generate LoRaDB-UI .env file.
-
-        Args:
-            env_path: Path where .env file should be created
-            backend_port: UI backend API port
-            frontend_port: UI frontend port
-            jwt_secret: JWT secret (must match LoRaDB)
-            loradb_url: LoRaDB API URL (Docker internal network URL)
-        """
-        config = f"""# LoRaDB UI Configuration (Auto-generated)
-
-# Backend Configuration
-BACKEND_PORT={backend_port}
-
-# LoRaDB API URL (internal Docker network)
-LORADB_API_URL={loradb_url}
-
-# JWT Configuration (must match LoRaDB server)
-JWT_SECRET={jwt_secret}
-JWT_EXPIRATION_HOURS=1
-
-# Frontend Configuration
-FRONTEND_PORT={frontend_port}
-
-# Frontend API URL (accessible from browser)
-VITE_API_URL=http://localhost:{backend_port}
-
-# CORS Configuration
-CORS_ORIGIN=http://localhost:{frontend_port}
-"""
-        with open(env_path, 'w') as f:
-            f.write(config)
-
     def modify_docker_compose(
         self,
         compose_path: Path,
         instance_id: str,
-        service_type: str,
         network_name: str,
         volume_name: Optional[str] = None
     ):
@@ -241,7 +178,6 @@ CORS_ORIGIN=http://localhost:{frontend_port}
         Args:
             compose_path: Path to docker-compose.yml file
             instance_id: Unique instance identifier
-            service_type: Type of service ("loradb" or "ui")
             network_name: Unique Docker network name
             volume_name: Unique volume name (optional, only for LoRaDB)
         """
@@ -252,10 +188,7 @@ CORS_ORIGIN=http://localhost:{frontend_port}
         if 'version' in compose:
             del compose['version']
 
-        if service_type == "loradb":
-            self._modify_loradb_compose(compose, instance_id, network_name, volume_name)
-        elif service_type == "ui":
-            self._modify_ui_compose(compose, instance_id, network_name)
+        self._modify_loradb_compose(compose, instance_id, network_name, volume_name)
 
         # Write back
         with open(compose_path, 'w') as f:
@@ -283,19 +216,6 @@ CORS_ORIGIN=http://localhost:{frontend_port}
                                 compose['services']['loradb']['volumes'][i] = vol.replace(
                                     old_volume, volume_name
                                 )
-
-        # Modify network name
-        self._modify_networks(compose, network_name)
-
-    def _modify_ui_compose(self, compose: dict, instance_id: str, network_name: str):
-        """Modify UI docker-compose structure."""
-        # Modify container names
-        if 'services' in compose:
-            if 'backend' in compose['services']:
-                compose['services']['backend']['container_name'] = f"loradb-ui-backend-{instance_id}"
-
-            if 'frontend' in compose['services']:
-                compose['services']['frontend']['container_name'] = f"loradb-ui-frontend-{instance_id}"
 
         # Modify network name
         self._modify_networks(compose, network_name)

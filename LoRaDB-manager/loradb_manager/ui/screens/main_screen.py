@@ -65,7 +65,7 @@ class MainScreen(Screen):
         table = self.query_one("#instance-table", DataTable)
 
         # Add columns
-        table.add_columns("ID", "Name", "Status", "Ports (DB/BE/FE)", "Created")
+        table.add_columns("ID", "Name", "Status", "Port", "Created")
 
         # Populate rows
         self.refresh_instances()
@@ -86,11 +86,7 @@ class MainScreen(Screen):
 
             # Format row
             status_text = self._format_status(instance.status)
-            ports_text = (
-                f"{instance.ports.loradb_api}/"
-                f"{instance.ports.ui_backend}/"
-                f"{instance.ports.ui_frontend}"
-            )
+            ports_text = str(instance.ports.loradb_api)
             created_text = instance.created_at.strftime("%Y-%m-%d %H:%M")
 
             table.add_row(
