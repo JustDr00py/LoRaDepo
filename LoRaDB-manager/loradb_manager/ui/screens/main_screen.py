@@ -18,6 +18,7 @@ class MainScreen(Screen):
     BINDINGS = [
         Binding("s", "start_instance", "Start", show=True),
         Binding("t", "stop_instance", "Stop", show=True),
+        Binding("a", "manage_tokens", "Tokens", show=True),
         Binding("l", "view_logs", "Logs", show=True),
         Binding("e", "edit_config", "Edit", show=True),
         Binding("d", "delete_instance", "Delete", show=True),
@@ -54,6 +55,7 @@ class MainScreen(Screen):
             Button("Stop", id="btn-stop", variant="warning"),
             Button("Restart", id="btn-restart"),
             Button("Rebuild", id="btn-rebuild"),
+            Button("API Tokens", id="btn-tokens", variant="primary"),
             Button("Logs", id="btn-logs", variant="primary"),
             Button("Edit Config", id="btn-config"),
             Button("Delete", id="btn-delete", variant="error"),
@@ -164,6 +166,8 @@ class MainScreen(Screen):
             self.action_restart_instance()
         elif event.button.id == "btn-rebuild":
             self.action_rebuild_instance()
+        elif event.button.id == "btn-tokens":
+            self.action_manage_tokens()
         elif event.button.id == "btn-logs":
             self.action_view_logs()
         elif event.button.id == "btn-config":
@@ -261,6 +265,27 @@ class MainScreen(Screen):
         instance = self.instance_manager.get_instance(self.selected_instance_id)
         if instance:
             self.app.push_screen(LogsViewerScreen(instance, self.instance_manager))
+
+    def action_manage_tokens(self):
+        """Open token management screen for selected instance."""
+        if not self.selected_instance_id:
+            self.app.notify("Please select an instance first", severity="warning")
+            return
+
+        instance = self.instance_manager.get_instance(self.selected_instance_id)
+        if not instance:
+            return
+
+        # Check if instance is running
+        if instance.status != InstanceStatus.RUNNING:
+            self.app.notify(
+                "Instance must be running to manage API tokens",
+                severity="warning"
+            )
+            return
+
+        from .token_manager_screen import TokenManagerScreen
+        self.app.push_screen(TokenManagerScreen(instance))
 
     def action_edit_config(self):
         """Edit instance configuration."""

@@ -30,6 +30,11 @@ class Config:
     LOG_TAIL_LINES = 100
     STATUS_REFRESH_INTERVAL = 5  # seconds
 
+    # API Client
+    API_REQUEST_TIMEOUT = 30  # seconds
+    TOKEN_REFRESH_INTERVAL = 30  # seconds
+    JWT_TOKEN_LIFETIME = 300  # 5 minutes for TUI-generated admin tokens
+
     @classmethod
     def validate(cls):
         """

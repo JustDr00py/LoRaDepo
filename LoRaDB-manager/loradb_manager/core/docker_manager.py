@@ -38,6 +38,18 @@ class DockerManager:
         """
         loradb_compose = Path(metadata.loradb_dir) / "docker-compose.yml"
 
+        # Check if container exists and is in a bad state (restarting, exited, etc.)
+        # If so, clean it up first
+        try:
+            container_name = f"loradb-{metadata.instance_id}"
+            container = self.client.containers.get(container_name)
+            if container.status in ["restarting", "exited", "dead"]:
+                # Force remove the stuck container
+                container.remove(force=True)
+                time.sleep(1)  # Brief pause after removal
+        except NotFound:
+            pass  # No existing container, proceed normally
+
         # Start LoRaDB with unique project name
         self._compose_up(loradb_compose, f"loradb-{metadata.instance_id}")
 
@@ -67,9 +79,23 @@ class DockerManager:
         Raises:
             RuntimeError: If docker-compose command fails
         """
+        # First, force-stop any containers in bad states (restarting, stuck, etc.)
+        # This ensures we can stop containers that are in crash loops
+        try:
+            container_name = f"loradb-{metadata.instance_id}"
+            container = self.client.containers.get(container_name)
+            if container.status in ["restarting", "running", "paused"]:
+                # Force stop and remove the container
+                container.stop(timeout=5)
+                container.remove(force=True)
+        except NotFound:
+            pass  # Container doesn't exist, that's fine
+        except Exception:
+            pass  # Continue with compose down anyway
+
         loradb_compose = Path(metadata.loradb_dir) / "docker-compose.yml"
 
-        # Stop LoRaDB with unique project name
+        # Stop LoRaDB with unique project name (cleans up networks/volumes)
         self._compose_down(loradb_compose, f"loradb-{metadata.instance_id}")
 
     def restart_instance(self, metadata: InstanceMetadata):
@@ -134,6 +160,10 @@ class DockerManager:
                 return InstanceStatus.ERROR
             elif status == "created":
                 return InstanceStatus.STARTING
+            elif status == "restarting":
+                return InstanceStatus.ERROR  # Treat restarting as error state
+            elif status == "paused":
+                return InstanceStatus.STOPPED
             else:
                 return InstanceStatus.UNKNOWN
 
@@ -288,8 +318,10 @@ class DockerManager:
 
                 if health == "healthy":
                     return
-                elif container.status != "running":
-                    raise RuntimeError(f"Container {container_name} not running (status: {container.status})")
+                # Allow "running" and "restarting" to continue waiting
+                # Only fail on terminal states
+                elif container.status in ["exited", "dead", "removing"]:
+                    raise RuntimeError(f"Container {container_name} stopped (status: {container.status})")
 
             except NotFound:
                 pass
