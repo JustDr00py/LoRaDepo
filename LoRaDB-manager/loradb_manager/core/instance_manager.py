@@ -148,12 +148,13 @@ class InstanceManager:
                 tls_key_path=tls_key_path
             )
 
-            # Modify docker-compose.yml with unique names
+            # Modify docker-compose.yml with unique names and port mapping
             self.template_manager.modify_docker_compose(
                 loradb_dir / "docker-compose.yml",
                 instance_id,
                 network.network_name,
-                network.loradb_volume
+                network.loradb_volume,
+                ports.loradb_api
             )
 
             # Create metadata

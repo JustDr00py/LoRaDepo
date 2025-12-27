@@ -207,6 +207,9 @@ impl Config {
     }
 
     pub fn validate(&self) -> Result<()> {
+        // MQTT ingestion is now optional - HTTP ingestion can be used instead
+        // No validation required for MQTT brokers (both can be None)
+
         // Validate TLS certificate paths exist if TLS is enabled
         if self.api.enable_tls {
             if let Some(ref cert) = self.api.tls_cert {

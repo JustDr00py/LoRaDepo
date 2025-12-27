@@ -170,7 +170,8 @@ LORADB_MQTT_CHIRPSTACK_BROKER=mqtt://localhost:1883
         compose_path: Path,
         instance_id: str,
         network_name: str,
-        volume_name: Optional[str] = None
+        volume_name: Optional[str] = None,
+        port: Optional[int] = None
     ):
         """
         Modify docker-compose.yml with unique container, network, and volume names.
@@ -180,6 +181,7 @@ LORADB_MQTT_CHIRPSTACK_BROKER=mqtt://localhost:1883
             instance_id: Unique instance identifier
             network_name: Unique Docker network name
             volume_name: Unique volume name (optional, only for LoRaDB)
+            port: API port for the instance (optional, updates port mapping)
         """
         with open(compose_path, 'r') as f:
             compose = yaml.safe_load(f)
@@ -188,19 +190,25 @@ LORADB_MQTT_CHIRPSTACK_BROKER=mqtt://localhost:1883
         if 'version' in compose:
             del compose['version']
 
-        self._modify_loradb_compose(compose, instance_id, network_name, volume_name)
+        self._modify_loradb_compose(compose, instance_id, network_name, volume_name, port)
 
         # Write back
         with open(compose_path, 'w') as f:
             yaml.dump(compose, f, default_flow_style=False, sort_keys=False)
 
     def _modify_loradb_compose(
-        self, compose: dict, instance_id: str, network_name: str, volume_name: Optional[str]
+        self, compose: dict, instance_id: str, network_name: str, volume_name: Optional[str], port: Optional[int]
     ):
         """Modify LoRaDB docker-compose structure."""
         # Modify container name
         if 'services' in compose and 'loradb' in compose['services']:
             compose['services']['loradb']['container_name'] = f"loradb-{instance_id}"
+
+            # Modify port mapping if port is provided
+            if port and 'ports' in compose['services']['loradb']:
+                # Update port mapping to use the instance port
+                # Map host:port -> container:port (both same port inside and outside)
+                compose['services']['loradb']['ports'] = [f"{port}:{port}"]
 
         # Modify volume name
         if volume_name and 'volumes' in compose:
